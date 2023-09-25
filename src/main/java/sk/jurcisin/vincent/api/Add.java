@@ -1,8 +1,9 @@
-package sk.jurcisin.vincent.model;
+package sk.jurcisin.vincent.api;
 
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import sk.jurcisin.vincent.model.User;
+import sk.jurcisin.vincent.service.HibernateUtils;
 
 public class Add implements Command {
 
@@ -18,20 +19,16 @@ public class Add implements Command {
         this.userName = userName;
     }
 
-    public void execute(SessionFactory sessionFactory) {
-        System.out.println("Executing command: Add");
-
-        Transaction tx = null;
-        try (Session sess = sessionFactory.openSession()) {
-            tx = sess.beginTransaction();
-            User u = new User(userId, userGuid, userName);
-            sess.persist(u);
+    @Override
+    public void execute() {
+        try (Session session = HibernateUtils.getSessionFactory().openSession()) {
+            Transaction tx;
+            tx = session.beginTransaction();
+            User user = new User(userId, userGuid, userName);
+            session.persist(user);
             tx.commit();
         } catch (Exception e) {
-            System.err.println("Error: " + e);
-            if (tx != null) {
-                tx.rollback();
-            }
+            System.err.println(e.getMessage());
         }
     }
 

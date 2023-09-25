@@ -11,29 +11,23 @@ class HibernateUtilsTest {
     @Test
     void hibernateConfigTest() {
         User robert = new User(1, "a1", "Robert");
-        Transaction trx = null;
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            // new trx
-            trx = session.beginTransaction();
+            Transaction trx = session.beginTransaction();
             // persisting entity
             session.persist(robert);
             session.persist(new User(2, "a2", "John"));
             trx.commit();
         } catch (Exception e) {
-            if (trx != null) {
-                trx.rollback();
-            }
-            e.printStackTrace();
+            System.err.println(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
 
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             List<User> users = session.createQuery("from User", User.class).list();
             users.forEach(user -> System.out.println(user.toString()));
         } catch (Exception e) {
-            if (trx != null) {
-                trx.rollback();
-            }
-            e.printStackTrace();
+            System.err.println(e.getMessage());
+            throw new IllegalArgumentException(e);
         }
     }
 }
